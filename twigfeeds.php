@@ -56,10 +56,15 @@ class TwigFeedsPlugin extends Plugin
         return [
             'onBeforeCacheClear' => ['onBeforeCacheClear', 0],
             'onTwigSiteVariables' => ['outputFeeds', 0],
-            'onTwigPageVariables' => ['outputFeeds', 0]
+            'onTwigPageVariables' => ['outputFeeds', 0],
+            'onShortcodeHandlers' => ['onShortcodeHandlers', 0]            
         ];
     }
 
+    public function onShortcodeHandlers()
+    {
+        $this->grav['shortcode']->registerAllShortcodes(__DIR__.'/shortcodes');
+    }
 
     /**
      * Register cache-location with onBeforeCacheClear-event
