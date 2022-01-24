@@ -54,20 +54,4 @@ class WordPressObjectCacheStorage implements CacheStorageInterface
 
         return false;
     }
-
-    /**
-     * @param string $key
-     *
-     * @return bool
-     */
-    public function delete($key)
-    {
-        try {
-            return wp_cache_delete($key, $this->group);
-        } catch (\Exception $ignored) {
-            // Don't fail if we can't delete it
-        }
-
-        return false;
-    }
 }

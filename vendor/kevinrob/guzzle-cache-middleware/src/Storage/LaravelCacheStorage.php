@@ -63,12 +63,4 @@ class LaravelCacheStorage implements CacheStorageInterface
 
         return false;
     }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function delete($key)
-    {
-        return $this->cache->forget($key);
-    }
 }

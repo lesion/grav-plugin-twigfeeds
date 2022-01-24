@@ -75,18 +75,4 @@ class Psr6CacheStorage implements CacheStorageInterface
 
         return $this->cachePool->save($item);
     }
-
-    /**
-     * @param string $key
-     *
-     * @return bool
-     */
-    public function delete($key)
-    {
-        if (null !== $this->lastItem && $this->lastItem->getKey() === $key) {
-            $this->lastItem = null;
-        }
-
-        return $this->cachePool->deleteItem($key);
-    }
 }

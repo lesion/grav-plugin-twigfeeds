@@ -19,21 +19,19 @@ use Psr\Http\Message\ResponseInterface;
  */
 class GreedyCacheStrategy extends PrivateCacheStrategy
 {
-    const HEADER_TTL = 'X-Kevinrob-GuzzleCache-TTL';
-
     /**
      * @var int
      */
-    protected $defaultTtl;
+    protected $ttl;
 
     /**
      * @var KeyValueHttpHeader
      */
     private $varyHeaders;
 
-    public function __construct(CacheStorageInterface $cache = null, $defaultTtl, KeyValueHttpHeader $varyHeaders = null)
+    public function __construct(CacheStorageInterface $cache = null, $ttl, KeyValueHttpHeader $varyHeaders = null)
     {
-        $this->defaultTtl = $defaultTtl;
+        $this->ttl = $ttl;
         $this->varyHeaders = $varyHeaders;
         parent::__construct($cache);
     }
@@ -93,27 +91,12 @@ class GreedyCacheStrategy extends PrivateCacheStrategy
         }
 
         $response = $response->withoutHeader('Etag')->withoutHeader('Last-Modified');
-
-        $ttl = $this->defaultTtl;
-        if ($request->hasHeader(self::HEADER_TTL)) {
-            $ttlHeaderValues = $request->getHeader(self::HEADER_TTL);
-            $ttl = (int)reset($ttlHeaderValues);
-        }
-
-        return new CacheEntry($request->withoutHeader(self::HEADER_TTL), $response, new \DateTime(sprintf('+%d seconds', $ttl)));
+        return new CacheEntry($request, $response, new \DateTime(sprintf('+%d seconds', $this->ttl)));
     }
 
     public function fetch(RequestInterface $request)
     {
         $cache = $this->storage->fetch($this->getCacheKey($request, $this->varyHeaders));
         return $cache;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function delete(RequestInterface $request)
-    {
-        return $this->storage->delete($this->getCacheKey($request));
     }
 }

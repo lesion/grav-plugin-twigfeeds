@@ -90,12 +90,4 @@ class DelegatingCacheStrategy implements CacheStrategyInterface
     {
         return $this->getStrategyFor($request)->update($request, $response);
     }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function delete(RequestInterface $request)
-    {
-        return $this->getStrategyFor($request)->delete($request);
-    }
 }

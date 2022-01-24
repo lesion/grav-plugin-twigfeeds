@@ -3,6 +3,7 @@
 namespace PicoFeed\Reader;
 
 use DOMXPath;
+use GuzzleHttp\Exception\RequestException;
 use PicoFeed\Base;
 use PicoFeed\Client\Client;
 use PicoFeed\Client\ClientException;
@@ -99,7 +100,7 @@ class Favicon extends Base
      */
     public function download($url)
     {
-        $client = Client::getInstance();
+        $client = new Client($this->httpClient);
         $client->setConfig($this->config);
 
         Logger::setMessage(get_called_class().' Download => '.$url);
@@ -121,7 +122,11 @@ class Favicon extends Base
      */
     public function exists($url)
     {
-        return $this->download($url)->getContent() !== '';
+        try {
+            return $this->download($url)->getContent() !== '';
+        } catch (\Exception $e) {
+            return false;
+        }
     }
 
     /**
@@ -143,19 +148,25 @@ class Favicon extends Base
         }
 
         foreach ($icons as $icon_link) {
-            $icon_link = Url::resolve($icon_link, $website);
-            $resource = $this->download($icon_link);
-            $this->content = $resource->getContent();
-            $this->content_type = $resource->getContentType();
+            try {
+                $icon_link = Url::resolve($icon_link, $website);
+                $resource = $this->download($icon_link);
+                $this->content = $resource->getContent();
+                $this->content_type = $resource->getContentType();
 
-            if ($this->content !== '') {
-                return $icon_link;
-            } elseif ($favicon_link !== '') {
-                return $this->find($website_link);
+                if ($this->content !== '') {
+                    return $icon_link;
+                }
+            } catch (RequestException $e) {
+                continue;
             }
         }
 
-        return '';
+        if ($favicon_link !== '') {
+            return $this->find($website_link);
+        } else {
+            return '';
+        }
     }
 
     /**

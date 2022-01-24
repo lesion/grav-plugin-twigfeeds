@@ -3,7 +3,6 @@
 namespace Kevinrob\GuzzleCache\Tests;
 
 use Cache\Adapter\PHPArray\ArrayCachePool;
-use Cache\Bridge\SimpleCache\SimpleCacheBridge;
 use Doctrine\Common\Cache\ArrayCache;
 use Doctrine\Common\Cache\CacheProvider;
 use Doctrine\Common\Cache\ChainCache;
@@ -15,8 +14,6 @@ use Kevinrob\GuzzleCache\Storage\CompressedDoctrineCacheStorage;
 use Kevinrob\GuzzleCache\Storage\DoctrineCacheStorage;
 use Kevinrob\GuzzleCache\Storage\FlysystemStorage;
 use Kevinrob\GuzzleCache\Storage\Psr6CacheStorage;
-use Kevinrob\GuzzleCache\Storage\Psr16CacheStorage;
-use Kevinrob\GuzzleCache\Storage\VolatileRuntimeStorage;
 use Kevinrob\GuzzleCache\Strategy\PrivateCacheStrategy;
 use League\Flysystem\Adapter\Local;
 
@@ -33,9 +30,7 @@ class PrivateCacheTest extends \PHPUnit_Framework_TestCase
             new DoctrineCacheStorage(new PhpFileCache($TMP_DIR)),
             new FlysystemStorage(new Local($TMP_DIR)),
             new Psr6CacheStorage(new ArrayCachePool()),
-            new Psr16CacheStorage(new SimpleCacheBridge(new ArrayCachePool())),
             new CompressedDoctrineCacheStorage(new ArrayCache()),
-            new VolatileRuntimeStorage(),
         ];
 
         $request = new Request('GET', 'test.local');
@@ -44,12 +39,6 @@ class PrivateCacheTest extends \PHPUnit_Framework_TestCase
                 'Cache-Control' => 'max-age=60',
             ],
             'Test content'
-        );
-        $response2 = new Response(
-            200, [
-            'Cache-Control' => 'max-age=90',
-        ],
-            'Test new content'
         );
 
         /** @var CacheProvider $cacheProvider */
@@ -62,26 +51,12 @@ class PrivateCacheTest extends \PHPUnit_Framework_TestCase
             $cache->cache($request, $response);
             $entry = $cache->fetch($request);
 
-            $this->assertNotNull($entry, get_class($cacheProvider));
+            $this->assertNotNull($entry);
+
             $this->assertEquals(
                 (string) $response->getBody(),
-                (string) $entry->getResponse()->getBody(),
-                get_class($cacheProvider)
+                (string) $entry->getResponse()->getBody()
             );
-
-            $cache->update($request, $response2);
-            $entry = $cache->fetch($request);
-
-            $this->assertNotNull($entry, get_class($cacheProvider));
-            $this->assertEquals(
-                (string) $response2->getBody(),
-                (string) $entry->getResponse()->getBody(),
-                get_class($cacheProvider)
-            );
-
-            $cache->delete($request);
-            $entry = $cache->fetch($request);
-            $this->assertNull($entry, get_class($cacheProvider));
         }
 
         $this->rrmdir($TMP_DIR);

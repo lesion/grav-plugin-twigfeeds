@@ -20,11 +20,4 @@ interface CacheStorageInterface
      * @return bool
      */
     public function save($key, CacheEntry $data);
-
-    /**
-     * @param string $key
-     *
-     * @return bool
-     */
-    public function delete($key);
 }
