@@ -127,6 +127,8 @@ class TwigFeedsPlugin extends Plugin
      */
     public function outputFeeds()
     {
+        $assets = $this->grav['assets'];
+        $assets->addCss('plugin://twigfeeds/style.css');
         if ($this->isAdmin() || $this->config()['enabled'] != true) {
             return;
         }
