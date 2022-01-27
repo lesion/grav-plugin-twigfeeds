@@ -12,12 +12,16 @@ class FeedShortcode extends Shortcode
             $output = "";
             foreach($items as $item) {
                 $images = array_filter($item['medias'] ?? [], function($media) { return str_contains($media['type'], 'image'); } );
-                $output .= "<h3><a href='".$item['link']."'> ".$item['title']."</a></h3>";
+                $output .= "<a class='feed-item' href='".$item['link']."'>";
                 if (count($images) > 0) {
                     $image = array_pop($images);
-                    $output .= "<img src='{$image['url']}' alt='{$image['title']}'>";
+                    $output .= "<img src='{$image['url']}' alt='{$image['title']}' class='feed-img'></img>";
                 }
-                $output .= "<p>".$item['content']."</p>";
+                $output .= "<div class='feed-content'>";
+                $output .= "<h3>".$item['title']."</h3>";
+                $output .= "<span>" . $item['lastModified'] . "</span>";
+                $output .= "</div>";
+                $output .= "</a>";
             }
             return $output;
         });
